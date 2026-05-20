@@ -6,11 +6,11 @@ export default function Hero() {
         {/* LEFT */}
         <div className="flex-1">
           <h1 className="text-5xl md:text-6xl font-extrabold leading-tight">
-            Study better with the help of AI
+            Best AI-Powered SEO Learning & Assessment
           </h1>
 
           <p className="mt-4 text-gray-700 text-lg">
-            Turn any material into quizzes, flashcards, and study tools instantly.
+            Learn, Practice, and Master AI SEO Skills, Your Gateway to Smarter SEO Learning.
           </p>
 
           <div className="mt-6 flex gap-3">
