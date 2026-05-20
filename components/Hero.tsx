@@ -25,17 +25,6 @@ export default function Hero() {
            </button>
           </div>
         </div>
-
-        {/* RIGHT */}
-     
-        <div className="flex-1 mt-10 md:mt-0 flex justify-end">
-        <img
-        src="https://www.blueantz.in/images/smm-icon.png"
-        alt="dashboard"
-        className="rounded-xl shadow-lg"
-         />
-        </div>
-
       </div>
     </section>
   );
