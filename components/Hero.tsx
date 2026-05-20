@@ -1,7 +1,7 @@
 export default function Hero() {
   return (
-    <section className="pt-32 pb-24 bg-gradient-to-r from-green-300 via-blue-100 to-green-100">
-      <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center">
+      <section className="min-h-[90vh] flex items-center bg-gradient-to-r from-green-300 via-blue-100 to-green-100">
+      <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center pt-20">
 
         {/* LEFT */}
         <div className="flex-1">
