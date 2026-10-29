@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 interface ReelResult {
   success: boolean;
@@ -53,10 +53,26 @@ const FAQS = [
 export default function ReelDownloader() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
   const [result, setResult] = useState<ReelResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Cycling loading message to provide great feedback while Apify processes
+  useEffect(() => {
+    if (!loading) return;
+    const messages = [
+      "Connecting to Instagram...",
+      "Resolving reel media...",
+      "Extracting full HD video stream...",
+      "Preparing download links...",
+    ];
+    const timer = setInterval(() => {
+      setLoadingStep((prev) => (prev + 1) % messages.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [loading]);
 
   const reset = useCallback(() => {
     setResult(null);
@@ -79,6 +95,7 @@ export default function ReelDownloader() {
       e?.preventDefault();
       if (!url.trim()) return;
       setLoading(true);
+      setLoadingStep(0);
       setError(null);
       setResult(null);
       try {
@@ -89,7 +106,7 @@ export default function ReelDownloader() {
         });
         const data = await res.json();
         if (!res.ok || !data.success) {
-          setError(data.error || "Something went wrong. Please try again.");
+          setError(data.error || "Something went wrong. Please check the URL and try again.");
         } else {
           setResult(data);
         }
@@ -102,11 +119,20 @@ export default function ReelDownloader() {
     [url]
   );
 
+  const loadingMessages = [
+    "Connecting to Instagram...",
+    "Resolving reel media...",
+    "Extracting full HD video stream...",
+    "Preparing download links...",
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col">
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col font-sans">
       {/* Nav */}
       <nav className="border-b border-white/5 px-6 py-4 flex items-center justify-between">
-        <a href="https://aotech.shop" className="text-xl font-bold ig-gradient-text">AoTech</a>
+        <a href="https://aotech.shop" className="text-xl font-bold ig-gradient-text">
+          AoTech
+        </a>
         <span className="text-sm text-gray-500">Free Tools</span>
       </nav>
 
@@ -115,7 +141,10 @@ export default function ReelDownloader() {
         <div
           aria-hidden
           className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(220,39,67,0.18) 0%, transparent 70%)" }}
+          style={{
+            background:
+              "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(220,39,67,0.18) 0%, transparent 70%)",
+          }}
         />
         <div className="relative z-10 flex flex-col items-center gap-5 max-w-2xl mx-auto">
           <div className="ig-gradient p-4 rounded-2xl shadow-2xl animate-pulse-ring">
@@ -125,14 +154,13 @@ export default function ReelDownloader() {
             Instagram Reel <span className="ig-gradient-text">Downloader</span>
           </h1>
           <p className="text-gray-400 text-lg max-w-lg">
-            Download any public Instagram Reel instantly — free, HD, no watermark, no login.
+            Download any public Instagram Reel instantly — free, HD quality, no watermark, no login.
           </p>
         </div>
       </header>
 
       {/* Main */}
       <main className="flex-1 w-full max-w-2xl mx-auto px-4 pb-16">
-
         {/* Card */}
         <div className="glass-card rounded-2xl p-6 sm:p-8 shadow-2xl">
           {!result ? (
@@ -154,14 +182,19 @@ export default function ReelDownloader() {
                   spellCheck={false}
                 />
                 {url ? (
-                  <button type="button" onClick={() => setUrl("")} className="text-gray-500 hover:text-gray-300 transition text-lg leading-none" aria-label="Clear">
+                  <button
+                    type="button"
+                    onClick={() => setUrl("")}
+                    className="text-gray-500 hover:text-gray-300 transition text-lg leading-none px-1"
+                    aria-label="Clear"
+                  >
                     ✕
                   </button>
                 ) : (
                   <button
                     type="button"
                     onClick={handlePaste}
-                    className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-pink-400 transition border border-white/10 rounded-lg px-2 py-1"
+                    className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-pink-400 transition border border-white/10 rounded-lg px-2.5 py-1.5"
                   >
                     📋 Paste
                   </button>
@@ -182,43 +215,91 @@ export default function ReelDownloader() {
               >
                 {loading ? (
                   <>
-                    <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full inline-block animate-spin" aria-hidden />
-                    Fetching Reel…
+                    <span
+                      className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full inline-block animate-spin"
+                      aria-hidden
+                    />
+                    <span>{loadingMessages[loadingStep]}</span>
                   </>
                 ) : (
-                  <><DownloadIcon /> Download Reel</>
+                  <>
+                    <DownloadIcon /> Download Reel
+                  </>
                 )}
               </button>
-              <p className="text-center text-xs text-gray-600">Only public Instagram Reels can be downloaded.</p>
+              <p className="text-center text-xs text-gray-600">
+                Works with any public Instagram Reel, Post, or Video.
+              </p>
             </form>
           ) : (
-            <div className="flex flex-col gap-5">
-              {result.thumbnail && (
+            <div className="flex flex-col gap-6">
+              {/* Video Player or Thumbnail Preview */}
+              {result.videoUrl ? (
+                <div className="relative w-full max-w-sm mx-auto rounded-2xl overflow-hidden border border-white/10 bg-black aspect-[9/16] shadow-2xl">
+                  <video
+                    controls
+                    playsInline
+                    preload="metadata"
+                    poster={result.thumbnail || undefined}
+                    src={result.videoUrl}
+                    className="w-full h-full object-cover"
+                  >
+                    Your browser does not support video playback.
+                  </video>
+                </div>
+              ) : result.thumbnail ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <div className="relative w-full max-w-xs mx-auto rounded-xl overflow-hidden border border-white/10 aspect-square">
-                  <img src={result.thumbnail} alt={result.title || "Reel thumbnail"} className="w-full h-full object-cover" />
+                  <img
+                    src={result.thumbnail}
+                    alt={result.title || "Reel thumbnail"}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-              )}
-              <div className="text-center">
-                {result.authorName && <p className="text-sm text-pink-400 font-medium mb-1">@{result.authorName}</p>}
-                {result.title && <p className="text-gray-300 text-sm line-clamp-3">{result.title}</p>}
+              ) : null}
+
+              {/* Title & Author */}
+              <div className="text-center px-2">
+                {result.authorName && (
+                  <p className="text-sm font-semibold text-pink-400 mb-1">
+                    @{result.authorName}
+                  </p>
+                )}
+                {result.title && (
+                  <p className="text-gray-300 text-sm line-clamp-2 max-w-md mx-auto">
+                    {result.title}
+                  </p>
+                )}
               </div>
 
+              {/* Download Buttons */}
               {result.videoUrl ? (
-                <a
-                  href={result.videoUrl}
-                  download
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ig-gradient flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold text-white shadow-lg hover:opacity-90 transition"
-                >
-                  <DownloadIcon /> Save Video (HD)
-                </a>
+                <div className="flex flex-col gap-3">
+                  <a
+                    href={result.videoUrl}
+                    download="instagram-reel.mp4"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ig-gradient flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-white shadow-lg hover:opacity-90 transition text-base"
+                  >
+                    <DownloadIcon /> DOWNLOAD VIDEO (HD)
+                  </a>
+                  <a
+                    href={result.videoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium border border-white/10 text-gray-400 hover:text-white hover:bg-white/5 transition"
+                  >
+                    Direct Link (Open in New Tab)
+                  </a>
+                </div>
               ) : (
-                <>
+                <div className="flex flex-col gap-3">
                   <div className="text-center text-sm text-yellow-400 bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
-                    <p className="font-medium mb-1">Direct download unavailable</p>
-                    <p className="text-xs text-gray-400">Instagram restricts direct downloads for this reel. Open it on Instagram to save manually.</p>
+                    <p className="font-medium mb-1">Direct stream restricted</p>
+                    <p className="text-xs text-gray-400">
+                      Instagram restricted direct scraping for this reel. You can view or save it directly on Instagram.
+                    </p>
                   </div>
                   <a
                     href={result.postUrl}
@@ -228,9 +309,13 @@ export default function ReelDownloader() {
                   >
                     ↗ Open on Instagram
                   </a>
-                </>
+                </div>
               )}
-              <button onClick={reset} className="text-sm text-gray-500 hover:text-gray-300 transition underline underline-offset-4 mx-auto">
+
+              <button
+                onClick={reset}
+                className="text-sm text-gray-500 hover:text-gray-300 transition underline underline-offset-4 mx-auto pt-2"
+              >
                 ← Download another reel
               </button>
             </div>
@@ -300,13 +385,22 @@ export default function ReelDownloader() {
       {/* Footer */}
       <footer className="border-t border-white/5 py-8 px-4 text-center text-sm text-gray-600">
         <p className="mb-2">
-          <a href="https://aotech.shop" className="hover:text-gray-400 transition">AoTech</a> — Free online tools
+          <a href="https://aotech.shop" className="hover:text-gray-400 transition">
+            AoTech
+          </a>{" "}
+          — Free online tools
         </p>
         <p className="text-xs text-gray-700">
           For personal use only. Please respect Instagram&apos;s{" "}
-          <a href="https://help.instagram.com/581066165581870" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-500">
+          <a
+            href="https://help.instagram.com/581066165581870"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-gray-500"
+          >
             Terms of Service
-          </a>.
+          </a>
+          .
         </p>
       </footer>
     </div>
