@@ -22,7 +22,51 @@ export default function Navbar() {
 
         {/* CENTER */}
         <div className="hidden md:flex gap-10 text-gray-700 text-sm">
-          <span className="hover:text-black cursor-pointer">Services</span>
+          
+<div className="relative group">
+  <button className="flex items-center gap-2 hover:text-black cursor-pointer">
+    Services
+    <svg
+      className="w-4 h-4 transition-transform group-hover:rotate-180"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="m6 9 6 6 6-6"
+      />
+    </svg>
+  </button>
+
+  <div className="absolute left-0 top-full pt-4 w-56 hidden group-hover:block">
+    <div className="bg-white border border-gray-200 rounded-2xl shadow-xl p-2">
+      <a
+        href="/services/seo"
+        className="block px-4 py-3 rounded-xl hover:bg-gray-100"
+      >
+        SEO Services
+      </a>
+
+      <a
+        href="/services/web-development"
+        className="block px-4 py-3 rounded-xl hover:bg-gray-100"
+      >
+        Web Development
+      </a>
+
+      <a
+        href="/services/digital-marketing"
+        className="block px-4 py-3 rounded-xl hover:bg-gray-100"
+      >
+        Digital Marketing
+      </a>
+    </div>
+  </div>
+</div>
+
           <span className="hover:text-black cursor-pointer">About</span>
           <span className="hover:text-black cursor-pointer">Blog</span>
         </div>
